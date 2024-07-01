@@ -3,8 +3,8 @@
 
 | Student Information |                |
 |:-------------------:|----------------|
-|  Student Name       |   Name Here    |
-|  Student Email      |   Email Here   |
+|  Student Name       |   Devon Huang    |
+|  Student Email      |   dhuang16@sfsu.edu   |
 
 
 ## Purpose of jar Folder 
