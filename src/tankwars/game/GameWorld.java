@@ -1,15 +1,21 @@
-package game;
+package tankwars.game;
 
 
-import GameConstants;
-import Launcher;
+import tankwars.GameConstants;
+import tankwars.Launcher;
+import tankwars.ResourceManager;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -19,8 +25,10 @@ public class GameWorld extends JPanel implements Runnable {
 
     private BufferedImage world;
     private Tank t1;
+    private Tank t2;
     private final Launcher lf;
     private long tick = 0;
+    ArrayList<GameObject> gObjs = new ArrayList<>();
 
     /**
      *
@@ -34,8 +42,9 @@ public class GameWorld extends JPanel implements Runnable {
         try {
             while (true) {
                 this.tick++;
-                this.t1.update(); // update tank
-                this.repaint();   // redraw game
+                this.t1.update();
+                this.t2.update();// update tank
+                this.repaint();   // redraw tankwars.game
                 /*
                  * Sleep for 1000/144 ms (~6.9ms). This is done to have our 
                  * loop run at a fixed rate per/sec. 
@@ -48,7 +57,7 @@ public class GameWorld extends JPanel implements Runnable {
     }
 
     /**
-     * Reset game to its initial state.
+     * Reset tankwars.game to its initial state.
      */
     public void resetGame() {
         this.tick = 0;
@@ -65,6 +74,32 @@ public class GameWorld extends JPanel implements Runnable {
                 GameConstants.GAME_SCREEN_HEIGHT,
                 BufferedImage.TYPE_INT_RGB);
 
+        int row = 0;
+
+        InputStreamReader isr = new InputStreamReader(
+                Objects.requireNonNull(
+                        ResourceManager.class.getClassLoader().getResourceAsStream("map/map1.csv")
+
+                )
+        );
+
+        try (BufferedReader mapReader = new BufferedReader(isr)){
+            while(mapReader.ready()){
+                String line = mapReader.readLine();
+                String[] objs = line.split(",");
+                for(int col = 0; col < objs.length ;col++){
+                    String gameItem = objs[col];
+                    if(gameItem.equals("0")){
+                        continue;
+                    }
+                    this.gObjs.add(GameObject.newInstance(gameItem,col*32,row*32));
+                }
+                row++;
+            }
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+
         BufferedImage t1img = null;
         try {
             /*
@@ -80,16 +115,21 @@ public class GameWorld extends JPanel implements Runnable {
             ex.printStackTrace();
         }
 
-        t1 = new Tank(300, 300, 0, 0, (short) 0, t1img);
+        t1 = new Tank(300, 300, 0, 0, (short) 0, ResourceManager.getSprite("t1"));
         TankControl tc1 = new TankControl(t1, KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE);
         this.lf.getJf().addKeyListener(tc1);
+        t2 = new Tank(400, 400, 0, 0, (short) 0, ResourceManager.getSprite("t2"));
+        TankControl tc2 = new TankControl(t2, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_ENTER);
+        this.lf.getJf().addKeyListener(tc2);
     }
 
     @Override
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         Graphics2D buffer = world.createGraphics();
+        this.gObjs.forEach(go->go.drawImage(buffer));
         this.t1.drawImage(buffer);
+        this.t2.drawImage(buffer);
         g2.drawImage(world, 0, 0, null);
     }
 }

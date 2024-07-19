@@ -1,6 +1,6 @@
-package game;
+package tankwars.game;
 
-import GameConstants;
+import tankwars.GameConstants;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -131,6 +131,7 @@ public class Tank{
         }
     }
 
+
     @Override
     public String toString() {
         return "x=" + x + ", y=" + y + ", angle=" + angle;
@@ -146,5 +147,19 @@ public class Tank{
         //g2d.rotate(Math.toRadians(angle), bounds.x + bounds.width/2, bounds.y + bounds.height/2);
         g2d.drawRect((int)x,(int)y,this.img.getWidth(), this.img.getHeight());
 
+    }
+
+    public void handleCollision(Object with){
+        if(with instanceof Bullet b){
+            //lose hp
+        }else if (with instanceof Wall w){
+            //stop undo move
+        }else if (with instanceof Speed sp){
+            //increase speed
+        }else if(with instanceof Health hl){
+            //add a heart
+        }else if(with instanceof Shield){
+            //add shield
+        }
     }
 }
