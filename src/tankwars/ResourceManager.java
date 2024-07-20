@@ -9,7 +9,7 @@ import java.util.*;
 public class ResourceManager {
     private final static Map<String, BufferedImage> sprites = new HashMap<>();
     private final static Map<String, Clip> sounds = new HashMap<>();
-    private final static Map<String, List<BufferedImage>> animations = new HashMap<>();
+    private final static Map<String, List<BufferedImage>> anims = new HashMap<>();
 
     private static BufferedImage loadSprite(String path) throws IOException {
         return ImageIO.read(
@@ -22,13 +22,13 @@ public class ResourceManager {
         ResourceManager.sprites.put("t1", loadSprite("tank1.png"));
         ResourceManager.sprites.put("t2", loadSprite("tank2.png"));
         ResourceManager.sprites.put("rocket", loadSprite("Rocket.gif"));
-
         ResourceManager.sprites.put("shield", loadSprite("shield.png"));
         ResourceManager.sprites.put("speed", loadSprite("speed.png"));
         ResourceManager.sprites.put("health" ,loadSprite("health.png"));
         ResourceManager.sprites.put("menu" , loadSprite("Title.bmp"));
         ResourceManager.sprites.put("bwall" , loadSprite("wall2.png"));
         ResourceManager.sprites.put("uwall" , loadSprite("wall1.png"));
+        ResourceManager.sprites.put("floor", loadSprite("Background.bmp"));
     }
 
     public static void loadAssets(){

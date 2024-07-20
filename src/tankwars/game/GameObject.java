@@ -19,6 +19,8 @@ public abstract class GameObject {
             default -> throw new IllegalArgumentException("unsupported type -> %s\n".formatted(type));
         };
         }
-        public abstract void drawImage(Graphics g);
+        public void drawImage(Graphics g){
+            g.drawImage(this.img, (int)x, (int)y,null);
+        }
     }
 

@@ -9,10 +9,12 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.Buffer;
 import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +30,7 @@ public class GameWorld extends JPanel implements Runnable {
     private Tank t2;
     private final Launcher lf;
     private long tick = 0;
-    ArrayList<GameObject> gObjs = new ArrayList<>();
+    ArrayList<GameObject> gObjs = new ArrayList<>(1000);
 
     /**
      *
@@ -70,8 +72,8 @@ public class GameWorld extends JPanel implements Runnable {
      * initial state as well.
      */
     public void InitializeGame() {
-        this.world = new BufferedImage(GameConstants.GAME_SCREEN_WIDTH,
-                GameConstants.GAME_SCREEN_HEIGHT,
+        this.world = new BufferedImage(GameConstants.GAME_MAP_WIDTH,
+                GameConstants.GAME_MAP_HEIGHT,
                 BufferedImage.TYPE_INT_RGB);
 
         int row = 0;
@@ -123,13 +125,49 @@ public class GameWorld extends JPanel implements Runnable {
         this.lf.getJf().addKeyListener(tc2);
     }
 
+    static double scaleFactor = .12;
+
+    private void displayMiniMap(Graphics2D onScreenPanel) {
+        BufferedImage mm = this.world.getSubimage(0,0,GameConstants.GAME_MAP_WIDTH,GameConstants.GAME_MAP_HEIGHT);
+        double mmx = (GameConstants.GAME_SCREEN_WIDTH/2) - (GameConstants.GAME_MAP_WIDTH*(scaleFactor))/2;
+        double mmy = (GameConstants.GAME_SCREEN_HEIGHT) - (28+GameConstants.GAME_MAP_HEIGHT*(scaleFactor));
+        AffineTransform scaler = AffineTransform.getTranslateInstance(mmx,mmy);
+        scaler.scale(scaleFactor,scaleFactor);
+        onScreenPanel.drawImage(mm,scaler,null);
+    }
+
+    private void displaySplitScreen(Graphics2D onScreenPanel){
+        BufferedImage lh = this.world.getSubimage((int)this.t1.getScreenX(),(int)this.t1.getScreenY(),
+                GameConstants.GAME_SCREEN_WIDTH/2,GameConstants.GAME_SCREEN_HEIGHT);
+        BufferedImage rh = this.world.getSubimage((int)this.t2.getScreenX(),(int)this.t2.getScreenY(),
+                GameConstants.GAME_SCREEN_WIDTH/2,GameConstants.GAME_SCREEN_HEIGHT);
+        onScreenPanel.drawImage(lh,0,0,null);
+        onScreenPanel.drawImage(rh,GameConstants.GAME_SCREEN_WIDTH/2+3,0,null);
+
+    }
+
+    private void renderFloor(Graphics buffer){
+        BufferedImage floor = ResourceManager.getSprite("floor");
+        for(int i = 0; i<GameConstants.GAME_MAP_WIDTH;i+=320){
+            for(int j =0; j<GameConstants.GAME_MAP_HEIGHT;j+=240){
+                buffer.drawImage(floor,i,j,null);
+            }
+        }
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         Graphics2D buffer = world.createGraphics();
+        this.renderFloor(buffer);
         this.gObjs.forEach(go->go.drawImage(buffer));
         this.t1.drawImage(buffer);
         this.t2.drawImage(buffer);
-        g2.drawImage(world, 0, 0, null);
+
+//        g2.drawImage(world, 0, 0, null);
+        this.displaySplitScreen(g2);
+        this.displayMiniMap(g2);
+
     }
+
 }
