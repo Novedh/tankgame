@@ -46,12 +46,14 @@ public class GameWorld extends JPanel implements Runnable {
                 this.tick++;
                 this.t1.update();
                 this.t2.update();// update tank
+                this.renderFrame();
+                //this.checkCollisions();
                 this.repaint();   // redraw tankwars.game
                 /*
                  * Sleep for 1000/144 ms (~6.9ms). This is done to have our 
                  * loop run at a fixed rate per/sec. 
                 */
-                Thread.sleep(1000 / 144);
+                Thread.sleep(12);
             }
         } catch (InterruptedException ignored) {
             System.out.println(ignored);
@@ -123,6 +125,9 @@ public class GameWorld extends JPanel implements Runnable {
         t2 = new Tank(400, 400, 0, 0, (short) 0, ResourceManager.getSprite("t2"));
         TankControl tc2 = new TankControl(t2, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_ENTER);
         this.lf.getJf().addKeyListener(tc2);
+
+        this.gObjs.add(t1);
+        this.gObjs.add(t2);
     }
 
     static double scaleFactor = .12;
@@ -155,19 +160,39 @@ public class GameWorld extends JPanel implements Runnable {
         }
     }
 
+
+    private void renderFrame() {
+        Graphics2D buffer = world.createGraphics();
+        this.renderFloor(buffer);
+        for(int i =0; i< this.gObjs.size();i++){
+            this.gObjs.get(i).drawImage(buffer);
+        }
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        Graphics2D buffer = world.createGraphics();
-        this.renderFloor(buffer);
-        this.gObjs.forEach(go->go.drawImage(buffer));
-        this.t1.drawImage(buffer);
-        this.t2.drawImage(buffer);
 
 //        g2.drawImage(world, 0, 0, null);
         this.displaySplitScreen(g2);
         this.displayMiniMap(g2);
 
     }
+
+    private void checkCollisions(){
+
+        for(int i = 0; i < this.gObjs.size(); i++){
+            GameObject obj1 = this.gObjs.get(i);
+            for(int j =0; j< this.gObjs.size();j++){
+                if(i==j){continue;}
+                GameObject obj2 = this.gObjs.get(j);
+                if(obj1.getHitbox().intersects(obj2.getHitbox())){
+                    System.out.println("hit");
+                }
+            }
+        }
+    }
+
+
 
 }

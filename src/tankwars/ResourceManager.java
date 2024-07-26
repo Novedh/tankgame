@@ -21,10 +21,10 @@ public class ResourceManager {
     public static void initSprites() throws IOException {
         ResourceManager.sprites.put("t1", loadSprite("tank1.png"));
         ResourceManager.sprites.put("t2", loadSprite("tank2.png"));
-        ResourceManager.sprites.put("rocket", loadSprite("Rocket.gif"));
-        ResourceManager.sprites.put("shield", loadSprite("shield.png"));
-        ResourceManager.sprites.put("speed", loadSprite("speed.png"));
-        ResourceManager.sprites.put("health" ,loadSprite("health.png"));
+        ResourceManager.sprites.put("bullet", loadSprite("bullet.png"));
+        ResourceManager.sprites.put("shield", loadSprite("resources/powerups/shield.png"));
+        ResourceManager.sprites.put("speed", loadSprite("resources/powerups/speed.png"));
+        ResourceManager.sprites.put("health" ,loadSprite("resources/powerups/health.png"));
         ResourceManager.sprites.put("menu" , loadSprite("Title.bmp"));
         ResourceManager.sprites.put("bwall" , loadSprite("wall2.png"));
         ResourceManager.sprites.put("uwall" , loadSprite("wall1.png"));

@@ -1,20 +1,26 @@
 package tankwars.game;
 
 import tankwars.GameConstants;
+import tankwars.ResourceManager;
+
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.nio.Buffer;
+import java.util.ArrayList;
 
 /**
  *
  * @author anthony-pc
  */
-public class Tank{
+public class Tank extends GameObject{
 
+    private int lives = 3;
+    int ownerID;
+    private static ResourcePool<Bullet> bulletPool = new ResourcePool<>("bullet", Bullet.class,500);
     private float screenX;
     private float screenY;
-    private float x;
-    private float y;
+
     private float vx;
     private float vy;
     private float angle;
@@ -22,20 +28,22 @@ public class Tank{
     private float R = 5;
     private float ROTATIONSPEED = 3.0f;
 
-    private BufferedImage img;
     private boolean UpPressed;
     private boolean DownPressed;
     private boolean RightPressed;
     private boolean LeftPressed;
+    private boolean ShootPressed;
+
+    private ArrayList<Bullet> ammo = new ArrayList<Bullet>();
+    private long coolDown = 500;
+    private long timeSinceLastShot = 0;
 
     Tank(float x, float y, float vx, float vy, float angle, BufferedImage img) {
+        super(x,y,img);
         this.screenX = x;
         this.screenY = y;
-        this.x = x;
-        this.y = y;
         this.vx = vx;
         this.vy = vy;
-        this.img = img;
         this.angle = angle;
     }
 
@@ -67,6 +75,10 @@ public class Tank{
         this.RightPressed = true;
     }
 
+    void toggleShootPressed() {
+        this.ShootPressed = true;
+    }
+
     void toggleLeftPressed() {
         this.LeftPressed = true;
     }
@@ -87,6 +99,10 @@ public class Tank{
         this.LeftPressed = false;
     }
 
+    void unToggleShootPressed() {
+        this.ShootPressed = false;
+    }
+
     void update() {
         if (this.UpPressed) {
             this.moveForwards();
@@ -103,7 +119,24 @@ public class Tank{
         if (this.RightPressed) {
             this.rotateRight();
         }
+
+        long currTime = System.currentTimeMillis();
+        if(this.ShootPressed && currTime > this.timeSinceLastShot + this.coolDown){
+            this.timeSinceLastShot = currTime;
+            var p = ResourcePools.getPooldInstance("bullet");
+            p.initObject(
+                    x+ this.img.getWidth()/2f,
+                    y+this.img.getHeight()/2f,
+                       angle);
+            this.ammo.add((Bullet) p);
+        }
+
+        for(int i =0; i<ammo.size();i++){
+            this.ammo.get(i).update();
+        }
         centerScreen();
+        this.hitbox.setLocation((int)this.x, (int)this.y);
+
 
     }
 
@@ -169,7 +202,7 @@ public class Tank{
     }
 
 
-    void drawImage(Graphics g) {
+    public void drawImage(Graphics g) {
         AffineTransform rotation = AffineTransform.getTranslateInstance(x, y);
         rotation.rotate(Math.toRadians(angle), this.img.getWidth() / 2.0, this.img.getHeight() / 2.0);
         Graphics2D g2d = (Graphics2D) g;
@@ -177,20 +210,30 @@ public class Tank{
         g2d.setColor(Color.RED);
         //g2d.rotate(Math.toRadians(angle), bounds.x + bounds.width/2, bounds.y + bounds.height/2);
         g2d.drawRect((int)x,(int)y,this.img.getWidth(), this.img.getHeight());
+        for(int i =0; i<ammo.size();i++){
+            this.ammo.get(i).drawImage(g);
+        }
 
     }
 
-    public void handleCollision(Object with){
-        if(with instanceof Bullet b){
+    public void handleCollision(Object by){
+        if(by instanceof Bullet b){
             //lose hp
-        }else if (with instanceof Wall w){
+        }else if (by instanceof Wall w){
             //stop undo move
-        }else if (with instanceof Speed sp){
+        }else if (by instanceof Speed sp){
             //increase speed
-        }else if(with instanceof Health hl){
+        }else if(by instanceof Health hl){
             //add a heart
-        }else if(with instanceof Shield){
+        }else if(by instanceof Shield){
             //add shield
         }
     }
+
+    public Rectangle getHitbox(){
+        return hitbox.getBounds();
+    }
+
+
+
 }

@@ -1,5 +1,6 @@
 package tankwars.game;
 
+import org.w3c.dom.css.Rect;
 import tankwars.ResourceManager;
 
 import java.awt.*;
@@ -8,6 +9,15 @@ import java.awt.image.BufferedImage;
 public abstract class GameObject {
     protected float x,y;
     protected BufferedImage img;
+    protected Rectangle hitbox;
+    protected boolean hasCollided = false;
+
+    public GameObject(float x, float y, BufferedImage img){
+        this.x = x;
+        this.y = y;
+        this.img = img;
+        hitbox = new Rectangle((int)x,(int)y,img.getWidth(),img.getHeight());
+    }
 
     public static GameObject newInstance(String type,float x, float y){
         return switch (type) {
@@ -21,6 +31,9 @@ public abstract class GameObject {
         }
         public void drawImage(Graphics g){
             g.drawImage(this.img, (int)x, (int)y,null);
+        }
+        public Rectangle getHitbox(){
+            return hitbox.getBounds();
         }
     }
 
