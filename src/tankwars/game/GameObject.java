@@ -16,7 +16,7 @@ public abstract class GameObject {
         this.x = x;
         this.y = y;
         this.img = img;
-        hitbox = new Rectangle((int)x,(int)y,img.getWidth(),img.getHeight());
+        hitbox = new Rectangle((int) x,(int) y,img.getWidth(),img.getHeight());
     }
 
     public static GameObject newInstance(String type,float x, float y){

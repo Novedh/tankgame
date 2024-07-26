@@ -47,7 +47,7 @@ public class GameWorld extends JPanel implements Runnable {
                 this.t1.update();
                 this.t2.update();// update tank
                 this.renderFrame();
-                //this.checkCollisions();
+                this.checkCollisions();
                 this.repaint();   // redraw tankwars.game
                 /*
                  * Sleep for 1000/144 ms (~6.9ms). This is done to have our 
@@ -180,11 +180,10 @@ public class GameWorld extends JPanel implements Runnable {
     }
 
     private void checkCollisions(){
-
         for(int i = 0; i < this.gObjs.size(); i++){
             GameObject obj1 = this.gObjs.get(i);
-            for(int j =0; j< this.gObjs.size();j++){
-                if(i==j){continue;}
+            for(int j =0; j < this.gObjs.size(); j++){
+                if(i == j)continue;
                 GameObject obj2 = this.gObjs.get(j);
                 if(obj1.getHitbox().intersects(obj2.getHitbox())){
                     System.out.println("hit");

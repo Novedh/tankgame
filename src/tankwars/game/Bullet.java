@@ -22,7 +22,6 @@ public class Bullet extends GameObject implements Poolable{
     Bullet(BufferedImage img) {
 
         super(0,0,img);
-        this.img = img;
         this.vx = 0;
         this.vy = 0;
         this.angle = 0;
@@ -125,7 +124,4 @@ public class Bullet extends GameObject implements Poolable{
 
     }
 
-    public Rectangle getHitbox(){
-        return hitbox.getBounds();
-    }
 }

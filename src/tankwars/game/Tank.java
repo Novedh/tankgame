@@ -230,9 +230,6 @@ public class Tank extends GameObject{
         }
     }
 
-    public Rectangle getHitbox(){
-        return hitbox.getBounds();
-    }
 
 
 
