@@ -13,10 +13,11 @@ import java.util.ArrayList;
  *
  * @author anthony-pc
  */
-public class Tank extends GameObject{
+public class Tank extends GameObject implements Updatable{
 
     private int lives = 3;
-    int ownerID;
+    private int lifeCounter = 3;
+    int tankID;
     private static ResourcePool<Bullet> bulletPool = new ResourcePool<>("bullet", Bullet.class,500);
     private float screenX;
     private float screenY;
@@ -34,12 +35,12 @@ public class Tank extends GameObject{
     private boolean LeftPressed;
     private boolean ShootPressed;
 
-    private ArrayList<Bullet> ammo = new ArrayList<Bullet>();
     private long coolDown = 500;
     private long timeSinceLastShot = 0;
 
-    Tank(float x, float y, float vx, float vy, float angle, BufferedImage img) {
+    Tank(float x, float y, float vx, float vy, float angle, BufferedImage img, int tankID) {
         super(x,y,img);
+        this.tankID = tankID;
         this.screenX = x;
         this.screenY = y;
         this.vx = vx;
@@ -103,7 +104,7 @@ public class Tank extends GameObject{
         this.ShootPressed = false;
     }
 
-    void update() {
+    public void update(GameWorld gw) {
         if (this.UpPressed) {
             this.moveForwards();
         }
@@ -119,25 +120,41 @@ public class Tank extends GameObject{
         if (this.RightPressed) {
             this.rotateRight();
         }
+        if(lifeCounter>lives){
+            gw.anims.add(new Animations(tankCenterX(),tankCenterY(),ResourceManager.getAnim("bullethit")));
+            lifeCounter = lives;
+        }
 
         long currTime = System.currentTimeMillis();
         if(this.ShootPressed && currTime > this.timeSinceLastShot + this.coolDown){
             this.timeSinceLastShot = currTime;
             var p = ResourcePools.getPooldInstance("bullet");
             p.initObject(
-                    x+ this.img.getWidth()/2f,
-                    y+this.img.getHeight()/2f,
+                    safeShootX(),
+                    safeShootY(),
                        angle);
-            this.ammo.add((Bullet) p);
+            Bullet b = ((Bullet)p);
+            b.setOwner(this.tankID);
+            gw.addGameObject(b);
+            ResourceManager.getSound("shotFired").play();
+            gw.anims.add(new Animations(safeShootX(),safeShootY(),ResourceManager.getAnim("bulletshoot")));
         }
 
-        for(int i =0; i<ammo.size();i++){
-            this.ammo.get(i).update();
-        }
+
         centerScreen();
         this.hitbox.setLocation((int)this.x, (int)this.y);
 
-
+    }
+    private float safeShootX(){
+        return (int) Math.round((this.getX() + 25) + 35 * Math.cos(Math.toRadians( this.angle )));    }
+    private float safeShootY(){
+        return (int) Math.round((this.getY() + 25) + 35 * Math.sin(Math.toRadians( this.angle )));
+    }
+    public float tankCenterX(){
+        return this.x + this.img.getWidth()/2f;
+    }
+    public float tankCenterY(){
+        return this.y + this.img.getHeight()/2f;
     }
 
     private void rotateLeft() {
@@ -210,24 +227,37 @@ public class Tank extends GameObject{
         g2d.setColor(Color.RED);
         //g2d.rotate(Math.toRadians(angle), bounds.x + bounds.width/2, bounds.y + bounds.height/2);
         g2d.drawRect((int)x,(int)y,this.img.getWidth(), this.img.getHeight());
-        for(int i =0; i<ammo.size();i++){
-            this.ammo.get(i).drawImage(g);
-        }
+
 
     }
 
-    public void handleCollision(Object by){
+    public void handleCollision(GameObject by){
         if(by instanceof Bullet b){
-            //lose hp
+            if(b.checkOwner()!= this.tankID){
+                this.lives--;
+
+            }
         }else if (by instanceof Wall w){
             //stop undo move
-        }else if (by instanceof Speed sp){
-            //increase speed
-        }else if(by instanceof Health hl){
-            //add a heart
-        }else if(by instanceof Shield){
-            //add shield
+        }else if (by instanceof PowerUp p){
+            p.apply(this);
         }
+    }
+
+    public void setSpeed(float speed){
+        this.R = speed;
+    }
+
+    public void increaseHealth(int health){
+        this.lives ++;
+    }
+
+    public int getTankID(){
+        return tankID;
+    }
+
+    public float getTankAngle(){
+        return this.angle;
     }
 
 

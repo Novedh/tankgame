@@ -11,4 +11,9 @@ public class BreakableWall extends GameObject{
 
     }
 
+    @Override
+    public void handleCollision(GameObject obj2) {
+
+    }
+
 }

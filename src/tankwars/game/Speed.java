@@ -11,4 +11,9 @@ public class Speed extends GameObject{
         super(x,y,img);
     }
 
+    @Override
+    public void handleCollision(GameObject obj2) {
+
+    }
+
 }

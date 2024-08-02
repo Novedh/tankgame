@@ -35,5 +35,11 @@ public abstract class GameObject {
         public Rectangle getHitbox(){
             return hitbox.getBounds();
         }
+
+    public abstract void handleCollision(GameObject obj2);
+
+    public boolean getHasCollided() {
+        return this.hasCollided;
     }
+}
 

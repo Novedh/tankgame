@@ -6,14 +6,14 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
-public class Bullet extends GameObject implements Poolable{
+public class Bullet extends GameObject implements Poolable,Updatable{
 
 
 
     private float vx;
     private float vy;
     private float angle;
-    private int owner;
+    private int tankID =- 1;
     private boolean hasCollided = false;
 
     private float R = 5;
@@ -36,7 +36,7 @@ public class Bullet extends GameObject implements Poolable{
     }
 
 
-    void update() {
+    public void update(GameWorld gw) {
         vx = Math.round(R * Math.cos(Math.toRadians(angle)));
         vy = Math.round(R * Math.sin(Math.toRadians(angle)));
         x += vx;
@@ -76,6 +76,14 @@ public class Bullet extends GameObject implements Poolable{
         }
     }
 
+    public void setOwner(int tankID){
+        this.tankID = tankID;
+    }
+
+    public int checkOwner(){
+        return tankID;
+    }
+
 
 
     public void drawImage(Graphics g) {
@@ -89,19 +97,20 @@ public class Bullet extends GameObject implements Poolable{
 
     }
 
-    public void handleCollision(Object with){
-        if(with instanceof Bullet b){
-            //lose hp
-        }else if (with instanceof Wall w){
-            //stop undo move
-        }else if (with instanceof Speed sp){
-            //increase speed
-        }else if(with instanceof Health hl){
-            //add a heart
-        }else if(with instanceof Shield){
-            //add shield
+
+    public void handleCollision(GameObject by) {
+        if( by instanceof Tank){
+            //true if the bullet hits other tank
+            hasCollided = this.tankID != (((Tank)by).getTankID());
+        }else if(by instanceof Wall){
+            hasCollided = true;
+        }else if(by instanceof BreakableWall){
+            hasCollided = true;
         }
+
     }
+
+
 
 
     @Override

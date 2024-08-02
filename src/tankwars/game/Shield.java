@@ -11,4 +11,9 @@ public class Shield extends GameObject{
 
     }
 
+    @Override
+    public void handleCollision(GameObject obj2) {
+
+    }
+
 }

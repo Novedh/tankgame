@@ -31,6 +31,9 @@ public class GameWorld extends JPanel implements Runnable {
     private final Launcher lf;
     private long tick = 0;
     ArrayList<GameObject> gObjs = new ArrayList<>(1000);
+    ArrayList<Animations> anims = new ArrayList<>();
+    ArrayList<Animations> tankTracks = new ArrayList<>();
+
 
     /**
      *
@@ -41,13 +44,38 @@ public class GameWorld extends JPanel implements Runnable {
 
     @Override
     public void run() {
+        this.resetGame();
+        Sound bg = ResourceManager.getSound("bg");
+        bg.loopContinuously();
+        bg.play();
+
         try {
+
             while (true) {
                 this.tick++;
-                this.t1.update();
-                this.t2.update();// update tank
-                this.renderFrame();
+
+
+                this.tankTracks.add(new Animations(t1.tankCenterX(), t1.tankCenterY(), ResourceManager.getAnim("tracks")));
+                this.tankTracks.add(new Animations(t2.tankCenterX(), t2.tankCenterY(), ResourceManager.getAnim("tracks")));
+
+                for(int i = this.gObjs.size()-1; i>=0 ;i--){
+                    if(this.gObjs.get(i) instanceof Updatable u){
+                        u.update(this);
+                    }else{
+                        break;
+                    }
+                }
+
+
                 this.checkCollisions();
+                for(int i =0; i< this.anims.size(); i++){
+                    this.anims.get(i).update();
+                }
+                for(int i =0; i< this.tankTracks.size(); i++){
+                    this.tankTracks.get(i).update();
+                }
+                this.gObjs.removeIf(g->g.getHasCollided());
+                this.renderFrame();
                 this.repaint();   // redraw tankwars.game
                 /*
                  * Sleep for 1000/144 ms (~6.9ms). This is done to have our 
@@ -67,6 +95,10 @@ public class GameWorld extends JPanel implements Runnable {
         this.tick = 0;
         this.t1.setX(300);
         this.t1.setY(300);
+
+        this.t2.setX(600);
+        this.t2.setY(600);
+
     }
 
     /**
@@ -119,10 +151,10 @@ public class GameWorld extends JPanel implements Runnable {
             ex.printStackTrace();
         }
 
-        t1 = new Tank(300, 300, 0, 0, (short) 0, ResourceManager.getSprite("t1"));
+        t1 = new Tank(300, 300, 0, 0, (short) 0, ResourceManager.getSprite("t1"),0);
         TankControl tc1 = new TankControl(t1, KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE);
         this.lf.getJf().addKeyListener(tc1);
-        t2 = new Tank(400, 400, 0, 0, (short) 0, ResourceManager.getSprite("t2"));
+        t2 = new Tank(400, 400, 0, 0, (short) 0, ResourceManager.getSprite("t2"),1);
         TankControl tc2 = new TankControl(t2, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_ENTER);
         this.lf.getJf().addKeyListener(tc2);
 
@@ -164,8 +196,14 @@ public class GameWorld extends JPanel implements Runnable {
     private void renderFrame() {
         Graphics2D buffer = world.createGraphics();
         this.renderFloor(buffer);
+        for(int i =0; i< this.tankTracks.size(); i++){
+            this.tankTracks.get(i).render(buffer);
+        }
         for(int i =0; i< this.gObjs.size();i++){
             this.gObjs.get(i).drawImage(buffer);
+        }
+        for(int i =0; i< this.anims.size(); i++){
+            this.anims.get(i).render(buffer);
         }
     }
 
@@ -181,15 +219,27 @@ public class GameWorld extends JPanel implements Runnable {
 
     private void checkCollisions(){
         for(int i = 0; i < this.gObjs.size(); i++){
+
             GameObject obj1 = this.gObjs.get(i);
+            if(!(obj1 instanceof Updatable)){
+                continue;
+            }
             for(int j =0; j < this.gObjs.size(); j++){
                 if(i == j)continue;
                 GameObject obj2 = this.gObjs.get(j);
                 if(obj1.getHitbox().intersects(obj2.getHitbox())){
-                    System.out.println("hit");
+                    obj1.handleCollision(obj2);
                 }
             }
         }
+    }
+
+    public void addGameObject(GameObject g){
+        this.gObjs.add(g);
+    }
+
+    public void removeGameObject(GameObject g){
+        this.gObjs.remove(g);
     }
 
 

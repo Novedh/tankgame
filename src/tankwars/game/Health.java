@@ -10,4 +10,9 @@ public class Health extends GameObject{
         super(x,y,img);
     }
 
+    @Override
+    public void handleCollision(GameObject obj2) {
+
+    }
+
 }
