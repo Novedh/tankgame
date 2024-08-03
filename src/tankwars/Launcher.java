@@ -1,7 +1,8 @@
 package tankwars;
 
 import tankwars.game.*;
-import tankwars.menus.EndGamePanel;
+import tankwars.menus.End1GamePanel;
+import tankwars.menus.End2GamePanel;
 import tankwars.menus.StartMenuPanel;
 import javax.swing.*;
 import java.awt.*;
@@ -55,12 +56,14 @@ public class Launcher {
          * end panel is used to show the end tankwars.game panel.  it will contain
          * two buttons restart and exit.
          */
-        JPanel endPanel = new EndGamePanel(this); // create a new end tankwars.game pane;
+        JPanel endPanel1 = new End1GamePanel(this); // create a new end tankwars.game pane;
+        JPanel endPanel2 = new End2GamePanel(this);
         cl = new CardLayout(); // creating a new CardLayout Panel
         this.mainPanel.setLayout(cl); // set the layout of the main panel to our card layout
         this.mainPanel.add(startPanel, "start"); //add the start panel to the main panel
         this.mainPanel.add(gamePanel, "game");   //add the tankwars.game panel to the main panel
-        this.mainPanel.add(endPanel, "end");    // add the end tankwars.game panel to the main panel
+        this.mainPanel.add(endPanel1, "endtank1");    // add the end tankwars.game panel to the main panel
+        this.mainPanel.add(endPanel2, "endtank2");
         this.jf.add(mainPanel); // add the main panel to the JFrame
         this.jf.setResizable(false); //make the JFrame not resizable
         this.setFrame("start"); // set the current panel to start panel
@@ -79,8 +82,10 @@ public class Launcher {
                 // not stuck executing the tankwars.game loop.
                 (new Thread(this.gamePanel)).start();
             }
-            case "end" ->
+            case "endtank1" ->
                 // set the size of the jFrame to the expected size for the end panel
+                    this.jf.setSize(GameConstants.END_MENU_SCREEN_WIDTH, GameConstants.END_MENU_SCREEN_HEIGHT);
+            case "endtank2" ->
                     this.jf.setSize(GameConstants.END_MENU_SCREEN_WIDTH, GameConstants.END_MENU_SCREEN_HEIGHT);
         }
         this.cl.show(mainPanel, type); // change current panel shown on main panel tp the panel denoted by type.

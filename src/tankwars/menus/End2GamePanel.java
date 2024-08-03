@@ -3,20 +3,20 @@ package tankwars.menus;
 import tankwars.Launcher;
 import tankwars.ResourceManager;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
-public class EndGamePanel extends JPanel {
+public class End2GamePanel extends JPanel {
 
     private final BufferedImage menuBackground;
     private final Launcher lf;
 
-    public EndGamePanel(Launcher lf) {
+    public End2GamePanel(Launcher lf) {
         this.lf = lf;
-        this.menuBackground = ResourceManager.getSprite("menu");
+        this.menuBackground = ResourceManager.getSprite("tank2win");
+
+
         this.setBackground(Color.BLACK);
         this.setLayout(null);
 

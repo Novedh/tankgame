@@ -1,6 +1,7 @@
 package tankwars.game;
 
 import tankwars.GameConstants;
+import tankwars.ResourceManager;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -14,14 +15,16 @@ public class Bullet extends GameObject implements Poolable,Updatable{
     private float vy;
     private float angle;
     private int tankID =- 1;
-    private boolean hasCollided = false;
 
     private float R = 5;
     private float ROTATIONSPEED = 3.0f;
+    Sound bullethit = ResourceManager.getSound("bulletCollide");
+
+
 
     Bullet(BufferedImage img) {
 
-        super(0,0,img);
+        super(100,100,img);
         this.vx = 0;
         this.vy = 0;
         this.angle = 0;
@@ -99,13 +102,20 @@ public class Bullet extends GameObject implements Poolable,Updatable{
 
 
     public void handleCollision(GameObject by) {
+        bullethit.setVolume(.3f);
         if( by instanceof Tank){
             //true if the bullet hits other tank
             hasCollided = this.tankID != (((Tank)by).getTankID());
-        }else if(by instanceof Wall){
+            bullethit.play();
+
+        }else if(by instanceof Wall w){
             hasCollided = true;
-        }else if(by instanceof BreakableWall){
+            bullethit.play();
+        }else if(by instanceof BreakableWall bw){
+
+            bw.breakWall();
             hasCollided = true;
+            bullethit.play();
         }
 
     }

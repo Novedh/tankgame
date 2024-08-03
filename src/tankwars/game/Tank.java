@@ -16,12 +16,15 @@ import java.util.ArrayList;
 public class Tank extends GameObject implements Updatable{
 
     private int lives = 3;
+    private int health = 100;
     private int lifeCounter = 3;
     int tankID;
     private static ResourcePool<Bullet> bulletPool = new ResourcePool<>("bullet", Bullet.class,500);
     private float screenX;
     private float screenY;
 
+    private float startX;
+    private float startY;
     private float vx;
     private float vy;
     private float angle;
@@ -34,18 +37,27 @@ public class Tank extends GameObject implements Updatable{
     private boolean RightPressed;
     private boolean LeftPressed;
     private boolean ShootPressed;
+    private boolean isMoving = false;
+    private float tankIdleVolume = .01f;
+    private float tankMovingVolume = .02f;
 
+
+    public boolean shieldOn = false;
     private long coolDown = 500;
     private long timeSinceLastShot = 0;
+    Sound moving = ResourceManager.getSound("moving");
 
     Tank(float x, float y, float vx, float vy, float angle, BufferedImage img, int tankID) {
         super(x,y,img);
+        this.startX = x;
+        this.startY = y;
         this.tankID = tankID;
         this.screenX = x;
         this.screenY = y;
         this.vx = vx;
         this.vy = vy;
         this.angle = angle;
+
     }
 
     void setX(float x){ this.x = x; }
@@ -105,12 +117,16 @@ public class Tank extends GameObject implements Updatable{
     }
 
     public void update(GameWorld gw) {
+        boolean currMoving = false;
+
         if (this.UpPressed) {
             this.moveForwards();
+            currMoving = true;
         }
 
         if (this.DownPressed) {
             this.moveBackwards();
+            currMoving = true;
         }
 
         if (this.LeftPressed) {
@@ -125,6 +141,15 @@ public class Tank extends GameObject implements Updatable{
             lifeCounter = lives;
         }
 
+        if(currMoving && !isMoving){
+            moving.setVolume(tankMovingVolume);
+            moving.loopContinuously();
+            isMoving = true;
+        }else if(!currMoving && isMoving){
+            moving.setVolume(tankIdleVolume);
+            isMoving = false;
+        }
+
         long currTime = System.currentTimeMillis();
         if(this.ShootPressed && currTime > this.timeSinceLastShot + this.coolDown){
             this.timeSinceLastShot = currTime;
@@ -136,6 +161,7 @@ public class Tank extends GameObject implements Updatable{
             Bullet b = ((Bullet)p);
             b.setOwner(this.tankID);
             gw.addGameObject(b);
+            ResourceManager.getSound("shotFired").setVolume(2f);
             ResourceManager.getSound("shotFired").play();
             gw.anims.add(new Animations(safeShootX(),safeShootY(),ResourceManager.getAnim("bulletshoot")));
         }
@@ -170,7 +196,7 @@ public class Tank extends GameObject implements Updatable{
         vy =  Math.round(R * Math.sin(Math.toRadians(angle)));
         x -= vx;
         y -= vy;
-       checkBorder();
+        checkBorder();
     }
 
     private void moveForwards() {
@@ -234,13 +260,36 @@ public class Tank extends GameObject implements Updatable{
     public void handleCollision(GameObject by){
         if(by instanceof Bullet b){
             if(b.checkOwner()!= this.tankID){
-                this.lives--;
-
+                if(!shieldOn) {
+                    this.health -= 34;
+                    System.out.println(health + "remaining");
+                }
             }
         }else if (by instanceof Wall w){
-            //stop undo move
+            wallBlock();
+        }else if (by instanceof BreakableWall bw){
+            wallBlock();
         }else if (by instanceof PowerUp p){
             p.apply(this);
+        }
+    }
+
+    private void wallBlock(){
+        if (this.UpPressed) {
+            if (vx != 0) {
+                x -= vx;
+            }
+            if (vy != 0) {
+                y -= vy;
+            }
+        }
+        if (this.DownPressed) {
+            if (vx != 0) {
+                x += vx;
+            }
+            if (vy != 0) {
+                y += vy;
+            }
         }
     }
 
@@ -248,8 +297,11 @@ public class Tank extends GameObject implements Updatable{
         this.R = speed;
     }
 
-    public void increaseHealth(int health){
-        this.lives ++;
+    public void gainHealth(int health){
+        this.health += health;
+        if(this.health>100){
+            this.health=100;
+        }
     }
 
     public int getTankID(){
@@ -260,7 +312,77 @@ public class Tank extends GameObject implements Updatable{
         return this.angle;
     }
 
+    public void respawn(){
+        this.setX(this.startX);
+        this.setY(this.screenY);
+        this.health = 100;
+        this.hitbox.setLocation((int)startX,(int)startY);
+
+    }
+
+    public void reset(){
+        this.setX(this.startX);
+        this.setY(this.screenY);
+        this.health = 100;
+        this.hitbox.setLocation((int)startX,(int)startY);
+        this.lives = 3;
+
+    }
+
+    public int getHealth(){
+        return health;
+    }
+
+    public void loseLife(){
+        lives--;
+    }
 
 
+    public int getLife() {
+        return lives;
+    }
 
+    public void drawHealth(Graphics g){
+        int barWidth = 50;
+        int barHeight = 5;
+        int barX = (int) this.x + (this.img.getWidth() - barWidth) / 2;
+        int barY = (int) this.y - barHeight - 5;
+
+        float healthPercent = (float) this.health / 100;
+
+        g.setColor(Color.RED);
+        g.fillRect(barX, barY, barWidth, barHeight);
+
+        g.setColor(Color.GREEN);
+        g.fillRect(barX, barY, (int) (barWidth * healthPercent), barHeight);
+
+        g.setColor(Color.BLACK);
+        g.drawRect(barX, barY, barWidth, barHeight);
+
+    }
+
+    public void drawHeart(Graphics g){
+        BufferedImage heart = ResourceManager.getSprite("heart") ;
+        int lifeWidth = heart.getWidth();
+        int lifeHeight = heart.getHeight();
+        int spacing = 5;
+
+        int x = (int) this.x + (this.img.getWidth() - (lifeWidth * lives + (lives  - 1) * lives)) / 2;
+        int y = (int) this.y - lifeHeight - 10;
+
+        for (int i = 0; i < lives; i++) {
+            g.drawImage(heart, x, y, null);
+            x += lifeWidth + spacing;
+        }
+    }
+    public void drawShield(Graphics g) {
+        BufferedImage shield = ResourceManager.getSprite("bubble") ;
+        float bubbleX =tankCenterX() - shield.getWidth()/2f;
+        float bubbleY =tankCenterY() - shield.getHeight()/2f;
+        if(shieldOn){
+            g.drawImage(shield,(int)bubbleX,(int)bubbleY,null);
+
+        }
+
+    }
 }

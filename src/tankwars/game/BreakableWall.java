@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 
 public class BreakableWall extends GameObject{
 
+
     public BreakableWall(float x , float y, BufferedImage img){
         super(x,y,img);
 
@@ -14,6 +15,11 @@ public class BreakableWall extends GameObject{
     @Override
     public void handleCollision(GameObject obj2) {
 
+    }
+
+
+    public void breakWall(){
+        hasCollided = true;
     }
 
 }

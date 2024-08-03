@@ -43,6 +43,10 @@ public class Animations {
         }
     }
 
+    public boolean runStatus(){
+        return running;
+    }
+
 
 
 

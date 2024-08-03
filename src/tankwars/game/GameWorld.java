@@ -14,10 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.Buffer;
-import java.sql.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -46,6 +43,7 @@ public class GameWorld extends JPanel implements Runnable {
     public void run() {
         this.resetGame();
         Sound bg = ResourceManager.getSound("bg");
+        bg.setVolume(0.15f);
         bg.loopContinuously();
         bg.play();
 
@@ -66,6 +64,28 @@ public class GameWorld extends JPanel implements Runnable {
                     }
                 }
 
+                if(t1.getHealth() <=0 ){
+                    reloadMap();
+                    t1.respawn();
+                    t1.loseLife();
+                    t2.respawn();
+
+                }
+                if(t2.getHealth() <=0 ){
+                    reloadMap();
+                    t1.respawn();
+                    t2.loseLife();
+                    t2.respawn();
+                }
+                if(t2.getLife() == 0 ){
+                    resetGame();
+                    lf.setFrame("endtank1");
+                }
+                if(t1.getLife() == 0 ){
+                    resetGame();
+                    lf.setFrame("endtank2");
+                }
+
 
                 this.checkCollisions();
                 for(int i =0; i< this.anims.size(); i++){
@@ -75,6 +95,10 @@ public class GameWorld extends JPanel implements Runnable {
                     this.tankTracks.get(i).update();
                 }
                 this.gObjs.removeIf(g->g.getHasCollided());
+                this.tankTracks.removeIf(g->!g.runStatus());
+                this.anims.removeIf(g->!g.runStatus());
+
+
                 this.renderFrame();
                 this.repaint();   // redraw tankwars.game
                 /*
@@ -93,12 +117,12 @@ public class GameWorld extends JPanel implements Runnable {
      */
     public void resetGame() {
         this.tick = 0;
-        this.t1.setX(300);
-        this.t1.setY(300);
-
-        this.t2.setX(600);
-        this.t2.setY(600);
-
+        this.gObjs.clear();
+        this.anims.clear();
+        this.tankTracks.clear();
+        t1.reset();
+        t2.reset();
+        InitializeGame();
     }
 
     /**
@@ -110,31 +134,7 @@ public class GameWorld extends JPanel implements Runnable {
                 GameConstants.GAME_MAP_HEIGHT,
                 BufferedImage.TYPE_INT_RGB);
 
-        int row = 0;
-
-        InputStreamReader isr = new InputStreamReader(
-                Objects.requireNonNull(
-                        ResourceManager.class.getClassLoader().getResourceAsStream("map/map1.csv")
-
-                )
-        );
-
-        try (BufferedReader mapReader = new BufferedReader(isr)){
-            while(mapReader.ready()){
-                String line = mapReader.readLine();
-                String[] objs = line.split(",");
-                for(int col = 0; col < objs.length ;col++){
-                    String gameItem = objs[col];
-                    if(gameItem.equals("0")){
-                        continue;
-                    }
-                    this.gObjs.add(GameObject.newInstance(gameItem,col*32,row*32));
-                }
-                row++;
-            }
-        } catch (IOException e){
-            throw new RuntimeException(e);
-        }
+        reloadMap();
 
         BufferedImage t1img = null;
         try {
@@ -151,10 +151,10 @@ public class GameWorld extends JPanel implements Runnable {
             ex.printStackTrace();
         }
 
-        t1 = new Tank(300, 300, 0, 0, (short) 0, ResourceManager.getSprite("t1"),0);
+        t1 = new Tank(160, 150, 0, 0, (short) 0, ResourceManager.getSprite("t1"),0);
         TankControl tc1 = new TankControl(t1, KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE);
         this.lf.getJf().addKeyListener(tc1);
-        t2 = new Tank(400, 400, 0, 0, (short) 0, ResourceManager.getSprite("t2"),1);
+        t2 = new Tank(2400, 1800, 0, 0, (short) 0, ResourceManager.getSprite("t2"),1);
         TankControl tc2 = new TankControl(t2, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_ENTER);
         this.lf.getJf().addKeyListener(tc2);
 
@@ -200,7 +200,14 @@ public class GameWorld extends JPanel implements Runnable {
             this.tankTracks.get(i).render(buffer);
         }
         for(int i =0; i< this.gObjs.size();i++){
-            this.gObjs.get(i).drawImage(buffer);
+            GameObject obj = this.gObjs.get(i);
+            obj.drawImage(buffer);
+            if(obj instanceof Tank){
+                ((Tank) obj).drawHealth(buffer);
+                ((Tank) obj).drawHeart(buffer);
+                ((Tank) obj).drawShield(buffer);
+
+            }
         }
         for(int i =0; i< this.anims.size(); i++){
             this.anims.get(i).render(buffer);
@@ -242,6 +249,32 @@ public class GameWorld extends JPanel implements Runnable {
         this.gObjs.remove(g);
     }
 
+    private void reloadMap(){
+        int row = 0;
 
+        InputStreamReader isr = new InputStreamReader(
+                Objects.requireNonNull(
+                        ResourceManager.class.getClassLoader().getResourceAsStream("map/map1.csv")
+
+                )
+        );
+
+        try (BufferedReader mapReader = new BufferedReader(isr)){
+            while(mapReader.ready()){
+                String line = mapReader.readLine();
+                String[] objs = line.split(",");
+                for(int col = 0; col < objs.length ;col++){
+                    String gameItem = objs[col];
+                    if(gameItem.equals("0")){
+                        continue;
+                    }
+                    this.gObjs.add(GameObject.newInstance(gameItem,col*32,row*32));
+                }
+                row++;
+            }
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+    }
 
 }
