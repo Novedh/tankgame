@@ -175,10 +175,31 @@ public class GameWorld extends JPanel implements Runnable {
     }
 
     private void displaySplitScreen(Graphics2D onScreenPanel){
+        onScreenPanel .setColor(Color.BLACK);
+        onScreenPanel.fillRect(0, 0, GameConstants.GAME_SCREEN_WIDTH, GameConstants.GAME_SCREEN_HEIGHT);
+
+        int width1 = GameConstants.GAME_SCREEN_WIDTH/2;
+        int height1 = GameConstants.GAME_SCREEN_HEIGHT;
+        int width2 = GameConstants.GAME_SCREEN_WIDTH/2;
+        int height2 = GameConstants.GAME_SCREEN_HEIGHT;
+
+        if (t1.getScreenX() + width1 > world.getWidth()) {
+            width1 = world.getWidth() - (int)t1.getScreenX();
+        }
+        if (t1.getScreenY() + height1 > world.getHeight()) {
+            height1 = world.getHeight() - (int)t1.getScreenY();
+        }
+        if (t2.getScreenX() + width2 > world.getWidth()) {
+            width2 = world.getWidth() - (int)t2.getScreenX();
+        }
+        if (t2.getScreenY() + height2 > world.getHeight()) {
+            height2 = world.getHeight() - (int)t2.getScreenY();
+        }
+        
         BufferedImage lh = this.world.getSubimage((int)this.t1.getScreenX(),(int)this.t1.getScreenY(),
-                GameConstants.GAME_SCREEN_WIDTH/2,GameConstants.GAME_SCREEN_HEIGHT);
+                width1,height1);
         BufferedImage rh = this.world.getSubimage((int)this.t2.getScreenX(),(int)this.t2.getScreenY(),
-                GameConstants.GAME_SCREEN_WIDTH/2,GameConstants.GAME_SCREEN_HEIGHT);
+                width2,height2);
         onScreenPanel.drawImage(lh,0,0,null);
         onScreenPanel.drawImage(rh,GameConstants.GAME_SCREEN_WIDTH/2+3,0,null);
 

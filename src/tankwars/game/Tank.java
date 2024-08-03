@@ -43,7 +43,7 @@ public class Tank extends GameObject implements Updatable{
 
 
     public boolean shieldOn = false;
-    private long coolDown = 500;
+    private long coolDown = 800;
     private long timeSinceLastShot = 0;
     Sound moving = ResourceManager.getSound("moving");
 
@@ -250,9 +250,9 @@ public class Tank extends GameObject implements Updatable{
         rotation.rotate(Math.toRadians(angle), this.img.getWidth() / 2.0, this.img.getHeight() / 2.0);
         Graphics2D g2d = (Graphics2D) g;
         g2d.drawImage(this.img, rotation, null);
-        g2d.setColor(Color.RED);
+        //g2d.setColor(Color.RED);
         //g2d.rotate(Math.toRadians(angle), bounds.x + bounds.width/2, bounds.y + bounds.height/2);
-        g2d.drawRect((int)x,(int)y,this.img.getWidth(), this.img.getHeight());
+        //g2d.drawRect((int)x,(int)y,this.img.getWidth(), this.img.getHeight());
 
 
     }
@@ -271,6 +271,8 @@ public class Tank extends GameObject implements Updatable{
             wallBlock();
         }else if (by instanceof PowerUp p){
             p.apply(this);
+        }else if (by instanceof Tank t){
+            wallBlock();
         }
     }
 

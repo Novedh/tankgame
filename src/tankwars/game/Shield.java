@@ -3,6 +3,8 @@ package tankwars.game;
 
 import tankwars.ResourceManager;
 
+import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -11,9 +13,13 @@ public class Shield extends GameObject implements PowerUp{
 
     private Timer shieldTime;
     private int shieldDur = 10000;
+    private double scale = 1.8;
 
     public Shield(float x , float y, BufferedImage img){
         super(x,y,img);
+        hitbox.height = (int) (img.getHeight() * scale);
+        hitbox.width = (int) (img.getWidth() * scale);
+
 
     }
 
@@ -41,7 +47,17 @@ public class Shield extends GameObject implements PowerUp{
 
             hasCollided = true;
         }
+    }
+    public void drawImage(Graphics g){
+        Graphics2D g2d = (Graphics2D) g;
+
+        AffineTransform transform = new AffineTransform();
+        transform.translate((int) (x), (int) (y));
+        transform.scale(scale, scale);
+
+        g2d.drawImage(this.img, transform, null);
 
 
     }
+
 }
