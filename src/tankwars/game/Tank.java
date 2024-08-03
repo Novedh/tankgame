@@ -314,7 +314,7 @@ public class Tank extends GameObject implements Updatable{
 
     public void respawn(){
         this.setX(this.startX);
-        this.setY(this.screenY);
+        this.setY(this.startY);
         this.health = 100;
         this.hitbox.setLocation((int)startX,(int)startY);
 

@@ -9,7 +9,7 @@ import java.util.TimerTask;
 public class Speed extends GameObject implements PowerUp{
 
     private float normSpeed = 5;
-    private float boostSpeed = 7;
+    private float boostSpeed = 8;
     private long speedDuration = 12000;
     private Timer speedTime;
     private Boolean isBoosted = false;
@@ -35,6 +35,7 @@ public class Speed extends GameObject implements PowerUp{
                     @Override
                     public void run() {
                         t.setSpeed(normSpeed);
+                        isBoosted = false;
                     }
                 }, speedDuration);
             }

@@ -65,17 +65,14 @@ public class GameWorld extends JPanel implements Runnable {
                 }
 
                 if(t1.getHealth() <=0 ){
-                    reloadMap();
-                    t1.respawn();
                     t1.loseLife();
-                    t2.respawn();
+                    resetMatch();
 
                 }
                 if(t2.getHealth() <=0 ){
-                    reloadMap();
-                    t1.respawn();
                     t2.loseLife();
-                    t2.respawn();
+                    resetMatch();
+
                 }
                 if(t2.getLife() == 0 ){
                     resetGame();
@@ -125,6 +122,23 @@ public class GameWorld extends JPanel implements Runnable {
         InitializeGame();
     }
 
+    public void resetMatch(){
+        Tank temp1 = t1;
+        Tank temp2 = t2;
+        this.gObjs.clear();
+        this.anims.clear();
+        this.tankTracks.clear();
+        reloadMap();
+        t1 = temp1;
+        t2 = temp2;
+        t1.respawn();
+        t2.respawn();
+        this.gObjs.add(t1);
+        this.gObjs.add(t2);
+
+
+    }
+
     /**
      * Load all resources for Tank Wars Game. Set all Game Objects to their
      * initial state as well.
@@ -136,25 +150,12 @@ public class GameWorld extends JPanel implements Runnable {
 
         reloadMap();
 
-        BufferedImage t1img = null;
-        try {
-            /*
-             * note class loaders read files from the out folder (build folder in Netbeans) and not the
-             * current working directory. When running a jar, class loaders will read from within the jar.
-             */
-            t1img = ImageIO.read(
-                    Objects.requireNonNull(GameWorld.class.getClassLoader().getResource("tank1.png"),
-                    "Could not find tank1.png")
-            );
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-            ex.printStackTrace();
-        }
 
-        t1 = new Tank(160, 150, 0, 0, (short) 0, ResourceManager.getSprite("t1"),0);
+
+        t1 = new Tank(GameConstants.TANK1X, GameConstants.TANK1Y, 0, 0, (short) 0, ResourceManager.getSprite("t1"),0);
         TankControl tc1 = new TankControl(t1, KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_SPACE);
         this.lf.getJf().addKeyListener(tc1);
-        t2 = new Tank(2400, 1800, 0, 0, (short) 0, ResourceManager.getSprite("t2"),1);
+        t2 = new Tank(GameConstants.TANK2X, GameConstants.TANK2Y, 0, 0, (short) 0, ResourceManager.getSprite("t2"),1);
         TankControl tc2 = new TankControl(t2, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_ENTER);
         this.lf.getJf().addKeyListener(tc2);
 
@@ -254,7 +255,7 @@ public class GameWorld extends JPanel implements Runnable {
 
         InputStreamReader isr = new InputStreamReader(
                 Objects.requireNonNull(
-                        ResourceManager.class.getClassLoader().getResourceAsStream("map/map1.csv")
+                        ResourceManager.class.getClassLoader().getResourceAsStream("map/map2.csv")
 
                 )
         );

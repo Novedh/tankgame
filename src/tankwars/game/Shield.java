@@ -10,7 +10,7 @@ import java.util.TimerTask;
 public class Shield extends GameObject implements PowerUp{
 
     private Timer shieldTime;
-    private int shieldDur = 5000;
+    private int shieldDur = 10000;
 
     public Shield(float x , float y, BufferedImage img){
         super(x,y,img);
