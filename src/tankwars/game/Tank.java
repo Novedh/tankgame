@@ -17,7 +17,6 @@ public class Tank extends GameObject implements Updatable{
 
     private int lives = 3;
     private int health = 100;
-    private int lifeCounter = 3;
     int tankID;
     private static ResourcePool<Bullet> bulletPool = new ResourcePool<>("bullet", Bullet.class,500);
     private float screenX;
@@ -136,10 +135,7 @@ public class Tank extends GameObject implements Updatable{
         if (this.RightPressed) {
             this.rotateRight();
         }
-        if(lifeCounter>lives){
-            gw.anims.add(new Animations(tankCenterX(),tankCenterY(),ResourceManager.getAnim("bullethit")));
-            lifeCounter = lives;
-        }
+
 
         if(currMoving && !isMoving){
             moving.setVolume(tankMovingVolume);
@@ -262,7 +258,6 @@ public class Tank extends GameObject implements Updatable{
             if(b.checkOwner()!= this.tankID){
                 if(!shieldOn) {
                     this.health -= 34;
-                    System.out.println(health + "remaining");
                 }
             }
         }else if (by instanceof Wall w){

@@ -47,6 +47,11 @@ public class Bullet extends GameObject implements Poolable,Updatable{
         checkBorder();
         this.hitbox.setLocation((int)this.x,(int)this.y);
 
+        if(hasCollided){
+            gw.anims.add(new Animations(x,y,ResourceManager.getAnim("bullethit")));
+
+        }
+
     }
 
     private void rotateLeft() {
@@ -112,9 +117,8 @@ public class Bullet extends GameObject implements Poolable,Updatable{
             hasCollided = true;
             bullethit.play();
         }else if(by instanceof BreakableWall bw){
-
-            bw.breakWall();
             hasCollided = true;
+            bw.breakWall();
             bullethit.play();
         }
 

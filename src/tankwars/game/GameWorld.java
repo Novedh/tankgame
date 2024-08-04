@@ -55,6 +55,7 @@ public class GameWorld extends JPanel implements Runnable {
 
                 this.tankTracks.add(new Animations(t1.tankCenterX(), t1.tankCenterY(), ResourceManager.getAnim("tracks")));
                 this.tankTracks.add(new Animations(t2.tankCenterX(), t2.tankCenterY(), ResourceManager.getAnim("tracks")));
+                this.checkCollisions();
 
                 for(int i = this.gObjs.size()-1; i>=0 ;i--){
                     if(this.gObjs.get(i) instanceof Updatable u){
@@ -66,11 +67,15 @@ public class GameWorld extends JPanel implements Runnable {
 
                 if(t1.getHealth() <=0 ){
                     t1.loseLife();
+                    anims.add(new Animations(t1.tankCenterX(),t1.tankCenterY(),ResourceManager.getAnim("bullethit")));
                     resetMatch();
+
 
                 }
                 if(t2.getHealth() <=0 ){
                     t2.loseLife();
+                    anims.add(new Animations(t2.tankCenterX(),t2.tankCenterY(),ResourceManager.getAnim("bullethit")));
+
                     resetMatch();
 
                 }
@@ -84,7 +89,6 @@ public class GameWorld extends JPanel implements Runnable {
                 }
 
 
-                this.checkCollisions();
                 for(int i =0; i< this.anims.size(); i++){
                     this.anims.get(i).update();
                 }
@@ -195,7 +199,7 @@ public class GameWorld extends JPanel implements Runnable {
         if (t2.getScreenY() + height2 > world.getHeight()) {
             height2 = world.getHeight() - (int)t2.getScreenY();
         }
-        
+
         BufferedImage lh = this.world.getSubimage((int)this.t1.getScreenX(),(int)this.t1.getScreenY(),
                 width1,height1);
         BufferedImage rh = this.world.getSubimage((int)this.t2.getScreenX(),(int)this.t2.getScreenY(),
