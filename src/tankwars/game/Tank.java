@@ -275,17 +275,21 @@ public class Tank extends GameObject implements Updatable{
         if (this.UpPressed) {
             if (vx != 0) {
                 x -= vx;
+                vx =0;
             }
             if (vy != 0) {
                 y -= vy;
+                vy = 0;
             }
         }
         if (this.DownPressed) {
             if (vx != 0) {
                 x += vx;
+                vx = 0;
             }
             if (vy != 0) {
                 y += vy;
+                vy = 0;
             }
         }
     }
